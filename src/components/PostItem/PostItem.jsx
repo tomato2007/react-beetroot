@@ -1,14 +1,35 @@
 import React from 'react';
 
-class PostItem extends React.Component {
+class TableUsers extends React.Component {
+	constructor(props) {
+		super(props);
+
+		(async () => {
+			const resp = await fetch('/users');
+			const data = await resp.json();
+
+			this.state = {
+				users: data
+			};
+		})();
+	}
+
+	handleClick = () => {
+		this.setState({
+			user: this.state.users.reverse()
+		})
+	}
+
 	render = () => {
-		const { title = '', description = '' } = this.props;
+		const { users = [] } = this.state;
 
 		return <>
-			<h1>{title}</h1>
-			<p>{description}</p>
+			<button onClick={this.handleClick}>Revers</button>
+			{users.map((item, i) => (
+				<h1 key={i}>{item.name}</h1>
+			))}
 		</>
 	}
 }
 
-export default PostItem;
+export default TableUsers;
