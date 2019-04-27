@@ -14,43 +14,86 @@ class UsersRoute extends React.PureComponent {
 			surname: 'Surname1',
 			email: 'email1@mail.com',
 			phone: '+30000000000',
-			city: 'City1'
+			city: 'City1',	
 		}, {
 			id: 2,
 			name: 'Name2',
 			surname: 'Surname2',
 			email: 'email2@mail.com',
 			phone: '+30000000000',
-			city: 'City2'
+			city: 'City2',
 		}, {
 			id: 3,
-			name: 'Name2',
-			surname: 'Surname2',
-			email: 'email2@mail.com',
+			name: 'Name3',
+			surname: 'Surname3',
+			email: 'email3@mail.com',
 			phone: '+30000000000',
-			city: 'City2'
+			city: 'City3',
+			checked: true
 		}, {
 			id: 4,
-			name: 'Name2',
-			surname: 'Surname2',
-			email: 'email2@mail.com',
+			name: 'Name4',
+			surname: 'Surname4',
+			email: 'email4@mail.com',
 			phone: '+30000000000',
-			city: 'City2'
+			city: 'City4',
 		}, {
 			id: 5,
 			name: 'Name3',
 			surname: 'Surname3',
 			email: 'email3@mail.com',
 			phone: '+30000000000',
-			city: 'City3'
+			city: 'City3',
 		}, {
 			id: 6,
 			name: 'Name4',
 			surname: 'Surname4',
 			email: 'email4@mail.com',
 			phone: '+30000000000',
-			city: 'City4'
+			city: 'City4',
 		}]
+	}
+
+	commonCheckbox = null;
+	checkboxNodes = {};
+
+	handleSwitchSelectAll = (e) => {
+		const currentStateFlag = e.target.checked === undefined ? 
+			(() => {
+				const commonCheckboxNewState = !this.commonCheckbox.checked;
+				this.commonCheckbox.checked = commonCheckboxNewState;
+				return commonCheckboxNewState;
+			})() :
+			e.target.checked;
+		let id;
+		for (id in this.checkboxNodes) {
+			if (this.checkboxNodes[id]) {
+				this.checkboxNodes[id].checked = currentStateFlag;
+			}
+		}
+	}
+
+	handleDeleteSelectedRows = () => {
+		const { data } = this.state;
+		let id;
+		let idsForDelete = [];
+		let newCheckboxeNodes = {};
+
+		for (id in this.checkboxNodes) {
+			if (this.checkboxNodes[id]) {
+				if (this.checkboxNodes[id].checked === true) {
+					this.checkboxNodes[id].checked = false;
+					idsForDelete.push(Number(id));
+				}
+				else {
+					newCheckboxeNodes[id] = this.checkboxNodes[id];
+				}
+			}
+		}
+		this.checkboxNodes = { ...newCheckboxeNodes };
+		this.setState({
+			data: data.filter((item) => idsForDelete.indexOf(item.id) === -1)
+		});
 	}
 
 	render = () => {
@@ -58,8 +101,12 @@ class UsersRoute extends React.PureComponent {
 		return <>
 			<Toolbar title="Users">
 				<button>Создать пользователя</button>
-				<button>Выделить всех</button>
-				<button>Удалить выделенных</button>
+				<button onClick={this.handleSwitchSelectAll}>
+					Выделить всех
+				</button>
+				<button onClick={this.handleDeleteSelectedRows}>
+					Удалить выделенных
+				</button>
 			</Toolbar>
 
 			<Table>
@@ -74,7 +121,10 @@ class UsersRoute extends React.PureComponent {
 				].map((item, i) => (
 					<TableHeadCell key={i}>
 						{item === 'ID' ? 
-							<input type="checkbox" /> :
+							<input 
+								ref={(node) => this.commonCheckbox = node}
+								type="checkbox"
+								onChange={this.handleSwitchSelectAll} /> :
 							<b>{item}</b>}
 					</TableHeadCell>
 				))}
@@ -87,10 +137,17 @@ class UsersRoute extends React.PureComponent {
 							let key;
 							let ii = 0;
 							for (key in item) {
-								row.push(
-									<TableBodyCell key={ii}>
-										{item[key]}
-									</TableBodyCell>);
+								if (key !== 'checked') {
+									row.push(
+										<TableBodyCell key={ii}>
+											{key === 'id' ?
+												<input 
+													ref={(node) => this.checkboxNodes[item.id] = node}
+													type="checkbox" 
+													name={`row_${item.id}`} /> :
+													item[key]}
+										</TableBodyCell>);
+								}
 								ii++;
 							}
 							return row;
